@@ -37,12 +37,13 @@ class Category {
     int? id,
     String? name,
     Color? color,
+    bool removeColor = false,
     DateTime? createdAt,
   }) {
     return Category(
       id: id ?? this.id,
       name: name ?? this.name,
-      color: color ?? this.color,
+      color: removeColor ? null : (color ?? this.color),
       createdAt: createdAt ?? this.createdAt,
     );
   }

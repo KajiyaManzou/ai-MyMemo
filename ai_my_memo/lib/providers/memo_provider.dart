@@ -12,6 +12,7 @@ class MemoProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get hasMemos => _memos.isNotEmpty;
+  DatabaseHelper get databaseHelper => _databaseHelper;
 
   Future<void> loadMemos() async {
     _setLoading(true);
