@@ -12,6 +12,7 @@ ai-MyMemoは個人用のFlutterメモアプリケーションです。シンプ�
 - 開発環境: Xcode, Android Studio
 - データベース: SQlite
 - テスト: test, flutter_test
+- git: コミットメッセージは日本語
 
 ## Development Commands
 
