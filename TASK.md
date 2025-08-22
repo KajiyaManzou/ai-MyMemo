@@ -3,28 +3,28 @@
 ## Phase 1: 基本機能（2週間）
 
 ### 1.1 プロジェクト初期設定
-- [ ] Flutter プロジェクトの作成
-- [ ] pubspec.yaml の設定（必要なパッケージの追加）
+- [x] Flutter プロジェクトの作成
+- [x] pubspec.yaml の設定（必要なパッケージの追加）
   - `sqflite`
   - `shared_preferences`
   - `flutter_markdown`
   - `provider`
-- [ ] プロジェクト構成の設計
+- [x] プロジェクト構成の設計
   - `lib/models/`
   - `lib/screens/`
   - `lib/widgets/`
   - `lib/services/`
   - `lib/providers/`
-- [ ] アプリのテーマ設定（Material Design）
+- [x] アプリのテーマ設定（Material Design）
 
 ### 1.2 データベース設計・実装
-- [ ] データベースヘルパークラスの作成
-- [ ] memosテーブルの作成
-- [ ] categoriesテーブルの作成
-- [ ] tagsテーブルの作成
-- [ ] memo_tagsテーブルの作成
-- [ ] データベース初期化処理の実装
-- [ ] データモデルクラスの作成
+- [x] データベースヘルパークラスの作成
+- [x] memosテーブルの作成
+- [x] categoriesテーブルの作成
+- [x] tagsテーブルの作成
+- [x] memo_tagsテーブルの作成
+- [x] データベース初期化処理の実装
+- [x] データモデルクラスの作成
   - `Memo`
   - `Category`
   - `Tag`

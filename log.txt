@@ -81,16 +81,119 @@ lib/
 - **状態管理**: Provider
 - **Git**: コミットメッセージは日本語
 
+### 1.2 データベース設計・実装 ✅ 完了
+
+#### ✅ データベースヘルパークラスの作成
+- ファイル: `lib/services/database_helper.dart`
+- 実装方式: シングルトンパターン
+- 機能: 全テーブルのCRUD操作を含む包括的なデータベース管理クラス
+- データベース名: `ai_my_memo.db`
+- バージョン: 1
+
+#### ✅ テーブル作成
+**memosテーブル**:
+```sql
+CREATE TABLE memos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  category_id INTEGER,
+  is_favorite INTEGER DEFAULT 0,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL,
+  FOREIGN KEY (category_id) REFERENCES categories (id)
+)
+```
+
+**categoriesテーブル**:
+```sql
+CREATE TABLE categories (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE,
+  color TEXT,
+  created_at TEXT NOT NULL
+)
+```
+
+**tagsテーブル**:
+```sql
+CREATE TABLE tags (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL UNIQUE
+)
+```
+
+**memo_tagsテーブル**:
+```sql
+CREATE TABLE memo_tags (
+  memo_id INTEGER,
+  tag_id INTEGER,
+  PRIMARY KEY (memo_id, tag_id),
+  FOREIGN KEY (memo_id) REFERENCES memos (id) ON DELETE CASCADE,
+  FOREIGN KEY (tag_id) REFERENCES tags (id) ON DELETE CASCADE
+)
+```
+
+#### ✅ データベース初期化処理の実装
+- `_onCreate`メソッドで全テーブルを自動作成
+- 外部キー制約とカスケード削除を設定
+- データベースのオープン・クローズ機能
+- データベース削除機能（テスト・リセット用）
+
+#### ✅ データモデルクラスの作成
+
+**Memoクラス** (`lib/models/memo.dart`):
+- プロパティ: id, title, content, categoryId, isFavorite, createdAt, updatedAt
+- メソッド: toMap(), fromMap(), copyWith()
+- ユーティリティ: preview（100文字プレビュー）, formattedCreatedAt, formattedUpdatedAt
+- バリデーション: equals, hashCode, toString
+
+**Categoryクラス** (`lib/models/category.dart`):
+- プロパティ: id, name, color, createdAt
+- 色管理: 16進数での保存・読み込み、デフォルトカラーパレット
+- メソッド: toMap(), fromMap(), copyWith()
+- ユーティリティ: displayColor（デフォルト色の提供）
+
+**Tagクラス** (`lib/models/tag.dart`):
+- プロパティ: id, name
+- バリデーション: isValidTagName（文字数、文字種制限）
+- 正規化: normalizeTagName（小文字変換）
+- 表示用: displayName（#プレフィックス付き）
+
+#### 実装した高度な機能
+**検索・フィルタリング機能**:
+- 全文検索（タイトル・本文対象）
+- カテゴリー別フィルタリング
+- お気に入りフィルタリング
+- タグによる検索
+
+**タグ管理機能**:
+- メモとタグの関連付け・解除
+- メモに紐づくタグ一覧取得
+- タグに紐づくメモ一覧取得
+
+**ユーティリティ機能**:
+- データベースのクローズ機能
+- データベースの完全削除機能
+- 重複防止機能（ConflictAlgorithm.ignore）
+
+#### 依存関係の追加
+- `path: ^1.9.0` - データベースパス操作用パッケージを追加
+- 実行コマンド: `flutter pub get`
+
+#### 解決した技術的課題
+1. **pathパッケージ不足**: pubspec.yamlに`path: ^1.9.0`を追加
+2. **Color.value非推奨警告**: 16進数文字列での色保存方式に対応
+3. **int.parse引数エラー**: radix引数を名前付きパラメータで指定
+
+#### テスト結果
+- `flutter test`: 全テストが正常に通過
+- `flutter analyze`: 1つの非推奨警告のみ（Color.value使用）
+- データベース接続・テーブル作成が正常に動作することを確認
+
 ## 次のステップ
 
-### 1.2 データベース設計・実装 (未着手)
-- [ ] データベースヘルパークラスの作成
-- [ ] memosテーブルの作成
-- [ ] categoriesテーブルの作成
-- [ ] tagsテーブルの作成
-- [ ] memo_tagsテーブルの作成
-- [ ] データベース初期化処理の実装
-- [ ] データモデルクラスの作成（Memo, Category, Tag）
+### 1.3 メモ作成・編集・削除機能 (未着手)
 
 ## 問題・課題
 
@@ -125,12 +228,26 @@ mkdir -p lib/models lib/screens lib/widgets lib/services lib/providers
 flutter test
 ```
 
+## 作成されたファイル（追加分）
+
+### Phase 1.2で追加されたファイル
+1. **lib/services/database_helper.dart** - データベース管理クラス
+2. **lib/models/memo.dart** - メモデータモデル
+3. **lib/models/category.dart** - カテゴリーデータモデル  
+4. **lib/models/tag.dart** - タグデータモデル
+5. **pubspec.yaml** - pathパッケージ追加
+
 ## 成果物の概要
 
+### Phase 1.1 + 1.2 完了事項
 1. **完全なFlutterプロジェクト構成**が完成
 2. **基本的なアプリUI**（メモ一覧画面）が実装済み
 3. **ライト・ダークテーマ対応**が完了
 4. **必要な依存関係**がすべてインストール済み
-5. **テストが正常に動作**することを確認済み
+5. **データベース設計・実装**が完了
+6. **データモデルクラス**（Memo, Category, Tag）が実装済み
+7. **包括的なCRUD操作**が利用可能
+8. **検索・フィルタリング機能**の基盤が整備済み
+9. **テストが正常に動作**することを確認済み
 
-Phase 1.1の初期設定は完全に完了し、次のデータベース実装フェーズに進む準備が整っている。
+Phase 1.1-1.2が完全に完了し、次のメモ作成・編集・削除機能の実装フェーズに進む準備が整っている。データベース基盤とデータモデルが確立され、実際のUIとの連携開発が可能な状態。
