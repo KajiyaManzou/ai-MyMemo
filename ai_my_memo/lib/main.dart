@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'providers/memo_provider.dart';
+import 'screens/memo_edit_screen.dart';
 
 void main() {
   runApp(const MyMemoApp());
@@ -9,7 +12,11 @@ class MyMemoApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => MemoProvider()),
+      ],
+      child: MaterialApp(
       title: 'ai-MyMemo',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
@@ -59,6 +66,7 @@ class MyMemoApp extends StatelessWidget {
       ),
       themeMode: ThemeMode.system,
       home: const MemoListScreen(),
+      ),
     );
   }
 }
@@ -101,8 +109,17 @@ class MemoListScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // TODO: メモ作成画面への遷移を実装
+        onPressed: () async {
+          final result = await Navigator.push<bool>(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const MemoEditScreen(),
+            ),
+          );
+          
+          if (result == true && context.mounted) {
+            context.read<MemoProvider>().loadMemos();
+          }
         },
         tooltip: '新しいメモを作成',
         child: const Icon(Icons.add),
