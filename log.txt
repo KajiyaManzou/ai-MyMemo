@@ -1,0 +1,136 @@
+# ai-MyMemo 開発作業記録
+
+## 開始日時: 2025年8月22日
+
+## Phase 1: 基本機能（2週間）
+
+### 1.1 プロジェクト初期設定 ✅ 完了
+
+#### ✅ Flutterプロジェクトの作成
+- 実行コマンド: `flutter create ai_my_memo`
+- 作成場所: `/Users/hobara/dev/AI/ai-MyMemo/ai_my_memo/`
+- 結果: 130ファイルが作成され、プロジェクトが正常に初期化された
+
+#### ✅ pubspec.yamlの設定（必要なパッケージの追加）
+追加したパッケージ:
+- `sqflite: ^2.3.0` - ローカルデータベース
+- `shared_preferences: ^2.2.2` - 設定保存
+- `flutter_markdown: ^0.6.18` - マークダウン表示
+- `provider: ^6.1.1` - 状態管理
+
+その他の変更:
+- アプリ説明を「シンプルで高速な個人用メモアプリ」に変更
+- 実行コマンド: `flutter pub get`
+- 結果: 28の依存関係が正常にインストールされた
+
+#### ✅ プロジェクト構成の設計
+作成したディレクトリ構成:
+```
+lib/
+├── main.dart
+├── models/          # データモデル
+├── screens/         # 画面（Screen/Page）
+├── widgets/         # 再利用可能なウィジェット
+├── services/        # ビジネスロジック・外部サービス
+└── providers/       # 状態管理（Provider）
+```
+
+#### ✅ アプリのテーマ設定（Material Design）
+実装した内容:
+- Material Design 3を採用（`useMaterial3: true`）
+- ライトテーマとダークテーマの両方を設定
+- システムテーマに自動対応（`themeMode: ThemeMode.system`）
+- カラースキーム: Blueをベースカラーに設定
+- AppBarテーマ: 中央配置、エレベーション0
+- カードテーマ: 角丸（半径12px）、エレベーション2
+- 入力フィールドテーマ: 角丸（半径8px）、塗りつぶし
+
+#### main.dartの主な変更点:
+- クラス名を`MyApp` → `MyMemoApp`に変更
+- アプリタイトルを「ai-MyMemo」に設定
+- ホーム画面を`MemoListScreen`に設定
+- 基本的なメモ一覧画面を実装（空状態のUI）
+
+#### テストの修正:
+- widget_test.dartを新しいアプリ構成に合わせて修正
+- テスト内容: アプリタイトル、空状態メッセージ、FABの存在確認
+- 実行結果: 全テストが正常に通過
+
+## 作成されたファイル・ドキュメント
+
+### プロジェクト管理ファイル
+1. **企画書.md** - アプリの企画・仕様書
+2. **TASK.md** - 詳細な開発タスクリスト
+3. **README.md** - GitHub用のプロジェクト説明
+4. **CLAUDE.md** - Claude Code用の開発ガイド
+5. **database_er_diagram.md** - データベースER図
+
+### Flutter プロジェクトファイル
+- **ai_my_memo/** - Flutterプロジェクトディレクトリ
+- **pubspec.yaml** - 依存関係とプロジェクト設定
+- **lib/main.dart** - メインアプリケーションファイル
+
+## 技術スタック確定事項
+
+- **フレームワーク**: Flutter
+- **言語**: Dart
+- **エディター**: Cursor
+- **開発環境**: Xcode, Android Studio
+- **データベース**: SQLite (sqflite)
+- **テスト**: test, flutter_test
+- **状態管理**: Provider
+- **Git**: コミットメッセージは日本語
+
+## 次のステップ
+
+### 1.2 データベース設計・実装 (未着手)
+- [ ] データベースヘルパークラスの作成
+- [ ] memosテーブルの作成
+- [ ] categoriesテーブルの作成
+- [ ] tagsテーブルの作成
+- [ ] memo_tagsテーブルの作成
+- [ ] データベース初期化処理の実装
+- [ ] データモデルクラスの作成（Memo, Category, Tag）
+
+## 問題・課題
+
+### 解決済み
+1. **CardTheme型エラー** - `CardTheme` → `CardThemeData`に修正
+2. **テストエラー** - `MyApp` → `MyMemoApp`に対応してテストを修正
+
+### 今後の注意点
+- flutter_markdownパッケージが非推奨（discontinued）になっているため、代替パッケージの検討が必要
+- 複数のパッケージで新しいバージョンが利用可能だが、依存関係の制約により更新が必要な場合がある
+
+## 開発環境情報
+
+- **Flutter SDK**: 3.8.0+
+- **Dart SDK**: 3.8.0+
+- **プラットフォーム**: macOS (Darwin 24.6.0)
+- **作業ディレクトリ**: `/Users/hobara/dev/AI/ai-MyMemo/`
+
+## コマンド履歴
+
+```bash
+# プロジェクト作成
+flutter create ai_my_memo
+
+# 依存関係インストール
+cd ai_my_memo && flutter pub get
+
+# ディレクトリ構成作成
+mkdir -p lib/models lib/screens lib/widgets lib/services lib/providers
+
+# テスト実行
+flutter test
+```
+
+## 成果物の概要
+
+1. **完全なFlutterプロジェクト構成**が完成
+2. **基本的なアプリUI**（メモ一覧画面）が実装済み
+3. **ライト・ダークテーマ対応**が完了
+4. **必要な依存関係**がすべてインストール済み
+5. **テストが正常に動作**することを確認済み
+
+Phase 1.1の初期設定は完全に完了し、次のデータベース実装フェーズに進む準備が整っている。

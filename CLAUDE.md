@@ -39,8 +39,23 @@ flutter build appbundle
 # テストの実行
 flutter test
 
+# 単体テストの実行
+flutter test test/unit/
+
 # ウィジェットテストの実行
-flutter test test/widget_test.dart
+flutter test test/widget/
+
+# 統合テストの実行
+flutter test test/integration/
+
+# 全テストの実行
+flutter test
+
+# 特定のテストファイルの実行
+flutter test test/unit/models/memo_test.dart
+
+# テストカバレッジの確認
+flutter test --coverage
 
 # 依存関係の確認
 flutter pub deps
@@ -92,10 +107,10 @@ SQLiteを使用したローカルデータベース：
 - `provider`: 状態管理
 
 ### Development Phases
-1. **Phase 1（2週間）**: プロジェクト初期設定、データベース、基本CRUD機能
-2. **Phase 2（1週間）**: 検索機能、カテゴリー機能、タグ機能
-3. **Phase 3（1週間）**: UI/UX改善、ダークモード実装
-4. **Phase 4（1週間）**: お気に入り機能、設定画面、テスト、最適化
+1. **Phase 1（2週間）**: プロジェクト初期設定、データベース、基本CRUD機能、Phase 1単体テスト
+2. **Phase 2（1週間）**: 検索機能、カテゴリー機能、タグ機能、Phase 2単体テスト
+3. **Phase 3（1週間）**: UI/UX改善、ダークモード実装、Phase 3単体テスト
+4. **Phase 4（1週間）**: お気に入り機能、設定画面、Phase 4単体テスト、統合テスト、E2Eテスト
 
 ### State Management Pattern
 Providerパターンを使用：
@@ -109,3 +124,38 @@ Providerパターンを使用：
 - カテゴリー・タグによるフィルタリング
 - ダークモード対応
 - マークダウン記法サポート
+
+### Testing Strategy
+各開発フェーズで包括的なテストを実装：
+
+#### Unit Tests
+- **モデル層**: データモデル（Memo, Category, Tag）のテスト
+- **サービス層**: データベースヘルパーのCRUD操作テスト
+- **プロバイダー層**: 状態管理（Provider）のテスト
+- **機能別**: 各機能（検索、カテゴリー、タグ、お気に入り）のテスト
+
+#### Integration Tests
+- データベースとUIの連携テスト
+- メモ作成から保存までの一連の流れテスト
+- 検索機能の統合テスト
+
+#### E2E Tests
+- アプリ起動から基本操作までのシナリオテスト
+- 主要機能の網羅的なテスト
+- エラーケースのテスト
+
+#### Performance Tests
+- 大量データでの動作確認
+- メモリ使用量の測定
+- 起動速度の計測
+
+### Test File Structure
+```
+test/
+├── unit/
+│   ├── models/          # データモデルのテスト
+│   ├── services/        # データベースヘルパーのテスト
+│   └── providers/       # 状態管理のテスト
+├── widget/              # ウィジェットテスト
+└── integration/         # 統合テスト・E2Eテスト
+```
