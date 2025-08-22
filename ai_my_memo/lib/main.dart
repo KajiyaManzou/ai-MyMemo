@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/memo_provider.dart';
 import 'screens/memo_edit_screen.dart';
+import 'widgets/memo_list_item.dart';
 
 void main() {
   runApp(const MyMemoApp());
@@ -71,8 +72,21 @@ class MyMemoApp extends StatelessWidget {
   }
 }
 
-class MemoListScreen extends StatelessWidget {
+class MemoListScreen extends StatefulWidget {
   const MemoListScreen({super.key});
+
+  @override
+  State<MemoListScreen> createState() => _MemoListScreenState();
+}
+
+class _MemoListScreenState extends State<MemoListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<MemoProvider>().loadMemos();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,33 +94,116 @@ class MemoListScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('ai-MyMemo'),
       ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.note_add,
-              size: 64,
-              color: Colors.grey,
-            ),
-            SizedBox(height: 16),
-            Text(
-              'メモはまだありません',
-              style: TextStyle(
-                fontSize: 18,
-                color: Colors.grey,
+      body: Consumer<MemoProvider>(
+        builder: (context, memoProvider, child) {
+          if (memoProvider.isLoading) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
+
+          if (memoProvider.error != null) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.error_outline,
+                    size: 64,
+                    color: Colors.red,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'エラーが発生しました',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.red[700],
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    memoProvider.error!,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  ElevatedButton(
+                    onPressed: () {
+                      memoProvider.clearError();
+                      memoProvider.loadMemos();
+                    },
+                    child: const Text('再試行'),
+                  ),
+                ],
               ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              '右下の＋ボタンでメモを作成しましょう',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey,
+            );
+          }
+
+          if (!memoProvider.hasMemos) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.note_add,
+                    size: 64,
+                    color: Colors.grey,
+                  ),
+                  SizedBox(height: 16),
+                  Text(
+                    'メモはまだありません',
+                    style: TextStyle(
+                      fontSize: 18,
+                      color: Colors.grey,
+                    ),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    '右下の＋ボタンでメモを作成しましょう',
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
               ),
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: () async {
+              await memoProvider.loadMemos();
+            },
+            child: ListView.builder(
+              padding: const EdgeInsets.all(8.0),
+              itemCount: memoProvider.memos.length,
+              itemBuilder: (context, index) {
+                final memo = memoProvider.memos[index];
+                return MemoListItem(
+                  memo: memo,
+                  onTap: () async {
+                    final result = await Navigator.push<bool>(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => MemoEditScreen(memo: memo),
+                      ),
+                    );
+                    
+                    if (result == true && context.mounted) {
+                      memoProvider.loadMemos();
+                    }
+                  },
+                  onFavoriteToggle: () async {
+                    await memoProvider.toggleFavorite(memo.id!);
+                  },
+                );
+              },
             ),
-          ],
-        ),
+          );
+        },
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
