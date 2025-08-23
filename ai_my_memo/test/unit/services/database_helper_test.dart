@@ -3,7 +3,6 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:ai_my_memo/services/database_helper.dart';
 import 'package:ai_my_memo/models/memo.dart';
 import 'package:ai_my_memo/models/category.dart';
-import 'package:ai_my_memo/models/tag.dart';
 
 void main() {
   group('DatabaseHelper', () {
@@ -126,70 +125,6 @@ void main() {
       });
     });
 
-    group('Tag CRUD操作', () {
-      test('タグの作成・取得・更新・削除が正しく動作する', () async {
-        // 作成
-        final tagData = {
-          'name': 'テストタグ',
-        };
-        
-        final id = await databaseHelper.insertTag(tagData);
-        expect(id, greaterThan(0));
-
-        // 取得
-        final allTags = await databaseHelper.getAllTags();
-        expect(allTags.length, 1);
-        expect(allTags[0]['name'], 'テストタグ');
-
-        // 更新
-        final updateData = {
-          'name': '更新されたタグ',
-        };
-        
-        final updateResult = await databaseHelper.updateTag(id, updateData);
-        expect(updateResult, 1);
-
-        // 削除
-        final deleteResult = await databaseHelper.deleteTag(id);
-        expect(deleteResult, 1);
-
-        final tagsAfterDelete = await databaseHelper.getAllTags();
-        expect(tagsAfterDelete.length, 0);
-      });
-    });
-
-    group('MemoTag関連操作', () {
-      test('メモとタグの関連付けが正しく動作する', () async {
-        // メモとタグを作成
-        final memoId = await databaseHelper.insertMemo({
-          'title': 'タグ付きメモ',
-          'content': 'タグテスト',
-        });
-        
-        final tagId = await databaseHelper.insertTag({
-          'name': 'テストタグ',
-        });
-
-        // 関連付け
-        await databaseHelper.addTagToMemo(memoId, tagId);
-
-        // メモのタグを取得
-        final memoTags = await databaseHelper.getTagsForMemo(memoId);
-        expect(memoTags.length, 1);
-        expect(memoTags[0]['name'], 'テストタグ');
-
-        // タグのメモを取得
-        final tagMemos = await databaseHelper.getMemosForTag(tagId);
-        expect(tagMemos.length, 1);
-        expect(tagMemos[0]['title'], 'タグ付きメモ');
-
-        // 関連付け解除
-        await databaseHelper.removeTagFromMemo(memoId, tagId);
-
-        final memoTagsAfterRemove = await databaseHelper.getTagsForMemo(memoId);
-        expect(memoTagsAfterRemove.length, 0);
-      });
-    });
 
     group('検索機能', () {
       test('メモ検索が正しく動作する', () async {

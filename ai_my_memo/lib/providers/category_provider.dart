@@ -13,6 +13,7 @@ class CategoryProvider extends ChangeNotifier {
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get hasCategories => _categories.isNotEmpty;
+  DatabaseHelper get databaseHelper => _databaseHelper;
 
   Future<void> loadCategories() async {
     _setLoading(true);
