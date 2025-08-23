@@ -19,7 +19,6 @@ ai-MyMemoは、日常の思考やアイデアを素早く記録・整理でき�
 - 🔍 **全文検索** - タイトル・本文の高速検索
 
 ### 高度な機能
-- 🏷️ **タグ機能** - 柔軟なタグ付けと検索
 - ⭐ **お気に入り機能** - 重要なメモの管理
 - 🌙 **ダークモード対応** - 目に優しいテーマ切り替え
 - 📐 **フォントサイズ調整** - 読みやすさのカスタマイズ
@@ -79,8 +78,7 @@ lib/
 ├── main.dart                 # アプリエントリーポイント
 ├── models/                   # データモデル
 │   ├── memo.dart
-│   ├── category.dart
-│   └── tag.dart
+│   └── category.dart
 ├── screens/                  # 画面
 │   ├── memo_list_screen.dart
 │   ├── memo_edit_screen.dart
@@ -93,22 +91,20 @@ lib/
 └── providers/               # 状態管理
     ├── memo_provider.dart
     ├── category_provider.dart
-    └── settings_provider.dart
+    └── search_provider.dart
 ```
 
 ## 🗄️ データベース設計
 
 - **memos**: メモの基本情報
 - **categories**: カテゴリー管理
-- **tags**: タグ情報
-- **memo_tags**: メモとタグの関連付け
 
 詳細は[ER図](database_er_diagram.md)を参照してください。
 
 ## 🚧 開発ロードマップ
 
 - [x] **Phase 1**: プロジェクト初期設定・基本CRUD機能
-- [ ] **Phase 2**: 検索・分類機能
+- [x] **Phase 2**: 検索・分類機能
 - [ ] **Phase 3**: UI/UX改善・ダークモード
 - [ ] **Phase 4**: 追加機能・テスト・最適化
 
@@ -122,6 +118,7 @@ lib/
 
 ## 🔮 将来の拡張予定
 
+- 🏷️ **タグ機能** - 柔軟なタグ付けと検索
 - ☁️ クラウド同期機能
 - 🎤 音声メモ機能
 - 🖼️ 画像添付機能
