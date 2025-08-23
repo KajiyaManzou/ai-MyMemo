@@ -3,6 +3,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'providers/memo_provider.dart';
 import 'providers/category_provider.dart';
+import 'providers/search_provider.dart';
 import 'screens/memo_edit_screen.dart';
 import 'screens/category_list_screen.dart';
 import 'widgets/memo_list_item.dart';
@@ -20,6 +21,7 @@ class MyMemoApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => MemoProvider()),
         ChangeNotifierProvider(create: (_) => CategoryProvider()),
+        ChangeNotifierProvider(create: (_) => SearchProvider()),
       ],
       child: MaterialApp(
       title: 'ai-MyMemo',
@@ -93,6 +95,10 @@ class MemoListScreen extends StatefulWidget {
 }
 
 class _MemoListScreenState extends State<MemoListScreen> {
+  final TextEditingController _searchController = TextEditingController();
+  bool _isSearching = false;
+  String _currentSearchQuery = '';
+
   @override
   void initState() {
     super.initState();
@@ -102,53 +108,243 @@ class _MemoListScreenState extends State<MemoListScreen> {
   }
 
   @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  void _startSearch() {
+    setState(() {
+      _isSearching = true;
+    });
+  }
+
+  void _stopSearch() {
+    setState(() {
+      _isSearching = false;
+      _searchController.clear();
+      _currentSearchQuery = '';
+    });
+    context.read<MemoProvider>().loadMemos();
+  }
+
+  void _clearSearch() {
+    setState(() {
+      _currentSearchQuery = '';
+    });
+    _searchController.clear();
+    context.read<MemoProvider>().loadMemos();
+  }
+
+  void _onSearchChanged(String query) {
+    setState(() {
+      // 入力変更時にUI更新（履歴の表示を更新するため）
+    });
+    
+    if (query.isEmpty) {
+      setState(() {
+        _currentSearchQuery = '';
+      });
+      context.read<MemoProvider>().loadMemos();
+    }
+  }
+
+  void _onSearchSubmitted(String query) {
+    if (query.trim().isNotEmpty) {
+      setState(() {
+        _currentSearchQuery = query.trim();
+      });
+      context.read<SearchProvider>().addToSearchHistory(query.trim());
+      context.read<MemoProvider>().searchMemos(query.trim());
+    }
+  }
+
+  void _showFavorites() {
+    context.read<MemoProvider>().getFavoriteMemos();
+  }
+
+  void _showAllMemos() {
+    context.read<MemoProvider>().loadMemos();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('ai-MyMemo'),
+        title: _isSearching
+            ? TextField(
+                controller: _searchController,
+                decoration: const InputDecoration(
+                  hintText: 'メモを検索...',
+                  border: InputBorder.none,
+                  hintStyle: TextStyle(color: Colors.grey),
+                ),
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onSurface,
+                  fontSize: 16,
+                ),
+                autofocus: true,
+                onChanged: _onSearchChanged,
+                onSubmitted: _onSearchSubmitted,
+              )
+            : const Text('ai-MyMemo'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.category),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => const CategoryListScreen(),
+          if (!_isSearching) ...[
+            IconButton(
+              icon: const Icon(Icons.search),
+              onPressed: _startSearch,
+              tooltip: '検索',
+            ),
+            IconButton(
+              icon: const Icon(Icons.category),
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const CategoryListScreen(),
+                  ),
+                );
+              },
+              tooltip: 'カテゴリー管理',
+            ),
+            PopupMenuButton<String>(
+              onSelected: (value) {
+                switch (value) {
+                  case 'categories':
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const CategoryListScreen(),
+                      ),
+                    );
+                    break;
+                  case 'favorites':
+                    _showFavorites();
+                    break;
+                  case 'all':
+                    _showAllMemos();
+                    break;
+                }
+              },
+              itemBuilder: (context) => [
+                const PopupMenuItem(
+                  value: 'all',
+                  child: Row(
+                    children: [
+                      Icon(Icons.list),
+                      SizedBox(width: 8),
+                      Text('すべてのメモ'),
+                    ],
+                  ),
                 ),
-              );
-            },
-            tooltip: 'カテゴリー管理',
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              switch (value) {
-                case 'categories':
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const CategoryListScreen(),
-                    ),
-                  );
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'categories',
-                child: Row(
-                  children: [
-                    Icon(Icons.category),
-                    SizedBox(width: 8),
-                    Text('カテゴリー管理'),
-                  ],
+                const PopupMenuItem(
+                  value: 'favorites',
+                  child: Row(
+                    children: [
+                      Icon(Icons.favorite),
+                      SizedBox(width: 8),
+                      Text('お気に入り'),
+                    ],
+                  ),
                 ),
-              ),
-            ],
-          ),
+                const PopupMenuItem(
+                  value: 'categories',
+                  child: Row(
+                    children: [
+                      Icon(Icons.category),
+                      SizedBox(width: 8),
+                      Text('カテゴリー管理'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ] else ...[
+            IconButton(
+              icon: const Icon(Icons.backspace_outlined),
+              onPressed: _clearSearch,
+              tooltip: '検索をクリア',
+            ),
+            IconButton(
+              icon: const Icon(Icons.arrow_back),
+              onPressed: _stopSearch,
+              tooltip: '検索を終了',
+            ),
+          ],
         ],
       ),
-      body: Consumer<MemoProvider>(
-        builder: (context, memoProvider, child) {
+      body: Column(
+        children: [
+          // 検索履歴表示
+          if (_isSearching)
+            Consumer<SearchProvider>(
+              builder: (context, searchProvider, child) {
+                final suggestions = searchProvider.getSuggestions(_searchController.text);
+                if (suggestions.isEmpty) return const SizedBox.shrink();
+                
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    border: Border(
+                      bottom: BorderSide(
+                        color: Colors.grey.withValues(alpha: 0.3),
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Padding(
+                        padding: EdgeInsets.fromLTRB(16, 8, 16, 4),
+                        child: Text(
+                          '検索履歴',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                      ...suggestions.take(5).map((suggestion) => ListTile(
+                        leading: const Icon(Icons.history, size: 20, color: Colors.grey),
+                        title: Text(
+                          suggestion,
+                          style: const TextStyle(fontSize: 14),
+                        ),
+                        trailing: IconButton(
+                          icon: const Icon(Icons.close, size: 18),
+                          onPressed: () => searchProvider.removeFromSearchHistory(suggestion),
+                          padding: EdgeInsets.zero,
+                          constraints: const BoxConstraints(),
+                        ),
+                        dense: true,
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 0),
+                        onTap: () {
+                          _searchController.text = suggestion;
+                          _onSearchSubmitted(suggestion);
+                        },
+                      )),
+                      if (suggestions.length > 5)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+                          child: TextButton(
+                            onPressed: () => searchProvider.clearSearchHistory(),
+                            child: const Text(
+                              '履歴をクリア',
+                              style: TextStyle(fontSize: 12, color: Colors.red),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          // メモ一覧
+          Expanded(
+            child: Consumer<MemoProvider>(
+              builder: (context, memoProvider, child) {
           if (memoProvider.isLoading) {
             return const Center(
               child: CircularProgressIndicator(),
@@ -237,6 +433,7 @@ class _MemoListScreenState extends State<MemoListScreen> {
                 final memo = memoProvider.memos[index];
                 return MemoListItem(
                   memo: memo,
+                  searchQuery: _currentSearchQuery.isNotEmpty ? _currentSearchQuery : null,
                   onTap: () async {
                     final result = await Navigator.push<bool>(
                       context,
@@ -256,7 +453,10 @@ class _MemoListScreenState extends State<MemoListScreen> {
               },
             ),
           );
-        },
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
@@ -272,6 +472,7 @@ class _MemoListScreenState extends State<MemoListScreen> {
           }
         },
         tooltip: '新しいメモを作成',
+        heroTag: "main_add_memo_button",
         child: const Icon(Icons.add),
       ),
     );

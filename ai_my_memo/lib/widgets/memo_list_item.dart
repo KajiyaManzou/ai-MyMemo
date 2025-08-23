@@ -3,17 +3,20 @@ import 'package:provider/provider.dart';
 import '../models/memo.dart';
 import '../models/category.dart';
 import '../providers/category_provider.dart';
+import 'highlighted_text.dart';
 
 class MemoListItem extends StatelessWidget {
   final Memo memo;
   final VoidCallback? onTap;
   final VoidCallback? onFavoriteToggle;
+  final String? searchQuery;
 
   const MemoListItem({
     super.key,
     required this.memo,
     this.onTap,
     this.onFavoriteToggle,
+    this.searchQuery,
   });
 
   @override
@@ -76,14 +79,24 @@ class MemoListItem extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      memo.title,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
+                    child: searchQuery != null && searchQuery!.isNotEmpty
+                        ? HighlightedText(
+                            text: memo.title,
+                            searchQuery: searchQuery!,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          )
+                        : Text(
+                            memo.title,
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                   ),
                   const SizedBox(width: 8),
                   if (memo.isFavorite)
@@ -111,14 +124,24 @@ class MemoListItem extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               if (memo.content.isNotEmpty)
-                Text(
-                  memo.preview,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: Colors.grey[600],
-                  ),
-                  maxLines: 3,
-                  overflow: TextOverflow.ellipsis,
-                ),
+                searchQuery != null && searchQuery!.isNotEmpty
+                    ? HighlightedText(
+                        text: memo.preview,
+                        searchQuery: searchQuery!,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      )
+                    : Text(
+                        memo.preview,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                      ),
               const SizedBox(height: 12),
               Row(
                 children: [
