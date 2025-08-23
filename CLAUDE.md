@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-ai-MyMemoは個人用のFlutterメモアプリケーションです。シンプルで高速なメモ作成、カテゴリー分類、タグ機能、検索機能を提供します。
+ai-MyMemoは個人用のFlutterメモアプリケーションです。シンプルで高速なメモ作成、カテゴリー分類、検索機能を提供します。
 
 - 対象プラットフォーム: ios , android
 - 開発言語: flutter
@@ -75,8 +75,7 @@ lib/
 ├── main.dart                 # アプリケーションエントリーポイント
 ├── models/                   # データモデル
 │   ├── memo.dart
-│   ├── category.dart
-│   └── tag.dart
+│   └── category.dart
 ├── screens/                  # 画面（Screen/Page）
 │   ├── memo_list_screen.dart
 │   ├── memo_edit_screen.dart
@@ -97,8 +96,6 @@ SQLiteを使用したローカルデータベース：
 
 - **memos**: メモの基本情報（id, title, content, category_id, is_favorite, created_at, updated_at）
 - **categories**: カテゴリー情報（id, name, color, created_at）
-- **tags**: タグ情報（id, name）
-- **memo_tags**: メモとタグの多対多リレーション（memo_id, tag_id）
 
 ### Key Dependencies
 - `sqflite`: ローカルSQLiteデータベース
@@ -108,7 +105,7 @@ SQLiteを使用したローカルデータベース：
 
 ### Development Phases
 1. **Phase 1（2週間）**: プロジェクト初期設定、データベース、基本CRUD機能、Phase 1単体テスト
-2. **Phase 2（1週間）**: 検索機能、カテゴリー機能、タグ機能、Phase 2単体テスト
+2. **Phase 2（1週間）**: 検索機能、カテゴリー機能、Phase 2単体テスト
 3. **Phase 3（1週間）**: UI/UX改善、ダークモード実装、Phase 3単体テスト
 4. **Phase 4（1週間）**: お気に入り機能、設定画面、Phase 4単体テスト、統合テスト、E2Eテスト
 
@@ -121,7 +118,7 @@ Providerパターンを使用：
 ### Key Features
 - リアルタイム保存
 - 全文検索
-- カテゴリー・タグによるフィルタリング
+- カテゴリーによるフィルタリング
 - ダークモード対応
 - マークダウン記法サポート
 
@@ -129,10 +126,10 @@ Providerパターンを使用：
 各開発フェーズで包括的なテストを実装：
 
 #### Unit Tests
-- **モデル層**: データモデル（Memo, Category, Tag）のテスト
+- **モデル層**: データモデル（Memo, Category）のテスト
 - **サービス層**: データベースヘルパーのCRUD操作テスト
 - **プロバイダー層**: 状態管理（Provider）のテスト
-- **機能別**: 各機能（検索、カテゴリー、タグ、お気に入り）のテスト
+- **機能別**: 各機能（検索、カテゴリー、お気に入り）のテスト
 
 #### Integration Tests
 - データベースとUIの連携テスト
