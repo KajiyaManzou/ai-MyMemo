@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../models/memo.dart';
+import '../models/category.dart';
+import '../providers/category_provider.dart';
 
 class MemoListItem extends StatelessWidget {
   final Memo memo;
@@ -28,6 +31,48 @@ class MemoListItem extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // カテゴリー表示
+              if (memo.categoryId != null)
+                Consumer<CategoryProvider>(
+                  builder: (context, categoryProvider, child) {
+                    final category = categoryProvider.getCategoryById(memo.categoryId!);
+                    if (category == null) return const SizedBox.shrink();
+                    
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: category.displayColor.withOpacity(0.2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: category.displayColor.withOpacity(0.5),
+                            width: 1,
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              Icons.category,
+                              size: 12,
+                              color: category.displayColor,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              category.name,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: category.displayColor,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
               Row(
                 children: [
                   Expanded(

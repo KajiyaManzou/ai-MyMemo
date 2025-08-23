@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 import 'providers/memo_provider.dart';
+import 'providers/category_provider.dart';
 import 'screens/memo_edit_screen.dart';
+import 'screens/category_list_screen.dart';
 import 'widgets/memo_list_item.dart';
 
 void main() {
@@ -17,6 +19,7 @@ class MyMemoApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => MemoProvider()),
+        ChangeNotifierProvider(create: (_) => CategoryProvider()),
       ],
       child: MaterialApp(
       title: 'ai-MyMemo',
@@ -103,6 +106,46 @@ class _MemoListScreenState extends State<MemoListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('ai-MyMemo'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.category),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const CategoryListScreen(),
+                ),
+              );
+            },
+            tooltip: 'カテゴリー管理',
+          ),
+          PopupMenuButton<String>(
+            onSelected: (value) {
+              switch (value) {
+                case 'categories':
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const CategoryListScreen(),
+                    ),
+                  );
+                  break;
+              }
+            },
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'categories',
+                child: Row(
+                  children: [
+                    Icon(Icons.category),
+                    SizedBox(width: 8),
+                    Text('カテゴリー管理'),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
       body: Consumer<MemoProvider>(
         builder: (context, memoProvider, child) {

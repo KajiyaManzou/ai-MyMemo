@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/memo.dart';
+import '../models/category.dart';
 import '../providers/memo_provider.dart';
+import '../providers/category_provider.dart';
 
 class MemoEditScreen extends StatefulWidget {
   final Memo? memo;
@@ -23,18 +25,32 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
   
   bool _isLoading = false;
   bool _hasChanges = false;
+  Category? _selectedCategory;
   
   @override
   void initState() {
     super.initState();
     _initializeData();
     _setupListeners();
+    
+    // CategoryProviderのカテゴリーをロード
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<CategoryProvider>().loadCategories();
+      _setupCategorySelection();
+    });
   }
 
   void _initializeData() {
     if (widget.memo != null) {
       _titleController.text = widget.memo!.title;
       _contentController.text = widget.memo!.content;
+    }
+  }
+
+  void _setupCategorySelection() {
+    if (widget.memo?.categoryId != null) {
+      final categoryProvider = context.read<CategoryProvider>();
+      _selectedCategory = categoryProvider.getCategoryById(widget.memo!.categoryId!);
     }
   }
 
@@ -88,6 +104,7 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
         final updatedMemo = widget.memo!.copyWith(
           title: title.isEmpty ? 'タイトルなし' : title,
           content: content,
+          categoryId: _selectedCategory?.id,
           updatedAt: now,
         );
         await memoProvider.updateMemo(updatedMemo);
@@ -95,6 +112,7 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
         final newMemo = Memo(
           title: title.isEmpty ? 'タイトルなし' : title,
           content: content,
+          categoryId: _selectedCategory?.id,
           createdAt: now,
           updatedAt: now,
         );
@@ -265,6 +283,53 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
                 enabled: !_isLoading,
               ),
               const SizedBox(height: 16),
+              
+              // カテゴリー選択
+              Consumer<CategoryProvider>(
+                builder: (context, categoryProvider, child) {
+                  return InkWell(
+                    onTap: _isLoading ? null : () => _showCategorySelector(categoryProvider),
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.withOpacity(0.5)),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.category,
+                            color: _selectedCategory != null 
+                                ? _selectedCategory!.displayColor 
+                                : Colors.grey,
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              _selectedCategory?.name ?? 'カテゴリーを選択',
+                              style: TextStyle(
+                                color: _selectedCategory != null 
+                                    ? Theme.of(context).colorScheme.onSurface
+                                    : Colors.grey,
+                              ),
+                            ),
+                          ),
+                          if (_selectedCategory != null)
+                            IconButton(
+                              icon: const Icon(Icons.clear, size: 20),
+                              onPressed: _isLoading ? null : () => _clearCategory(),
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                            ),
+                          const Icon(Icons.arrow_drop_down),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+              const SizedBox(height: 16),
+              
               Expanded(
                 child: TextField(
                   controller: _contentController,
@@ -317,10 +382,73 @@ class _MemoEditScreenState extends State<MemoEditScreen> {
             ? FloatingActionButton(
                 onPressed: _saveMemo,
                 tooltip: '保存',
+                heroTag: "memo_edit_save_button",
                 child: const Icon(Icons.save),
               )
             : null,
       ),
     );
+  }
+
+  void _showCategorySelector(CategoryProvider categoryProvider) {
+    showModalBottomSheet<Category>(
+      context: context,
+      builder: (context) => Container(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'カテゴリーを選択',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
+            const SizedBox(height: 16),
+            if (categoryProvider.categories.isEmpty)
+              const Center(
+                child: Text(
+                  'カテゴリーがありません\nカテゴリー管理から作成してください',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: Colors.grey),
+                ),
+              )
+            else
+              ...categoryProvider.categories.map((category) {
+                return ListTile(
+                  leading: CircleAvatar(
+                    backgroundColor: category.displayColor,
+                    radius: 16,
+                    child: Icon(
+                      Icons.category,
+                      color: _getContrastColor(category.displayColor),
+                      size: 16,
+                    ),
+                  ),
+                  title: Text(category.name),
+                  onTap: () {
+                    setState(() {
+                      _selectedCategory = category;
+                      _hasChanges = true;
+                    });
+                    Navigator.pop(context, category);
+                  },
+                );
+              }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _clearCategory() {
+    setState(() {
+      _selectedCategory = null;
+      _hasChanges = true;
+    });
+  }
+
+  Color _getContrastColor(Color color) {
+    final brightness = ThemeData.estimateBrightnessForColor(color);
+    return brightness == Brightness.dark ? Colors.white : Colors.black;
   }
 }
