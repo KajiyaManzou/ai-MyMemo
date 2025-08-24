@@ -1,6 +1,9 @@
 # ai-MyMemo
 
-> シンプルで高速な個人用メモアプリ
+> シンプルで高速な個人用メモアプリ。**Cursor**と**ClaudeCode**を利用して全ての開発処理を実行を実験する。
+
+> 初めての開発だったが、準備が足りなかった。基本設計段階から**ClaudeCode**と意見交換して内容を詰める必要があった。知らない言語で実装を依頼したので、不良があった時に人間が対策することが出来なかった。今回はフェーズ２までで開発を停止。もう一度最初からやり直す。
+
 
 ![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)
 ![Dart](https://img.shields.io/badge/Dart-0175C2?style=for-the-badge&logo=dart&logoColor=white)
